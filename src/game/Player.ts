@@ -17,6 +17,10 @@ const COYOTE_TIME = 0.1;
 const JUMP_BUFFER = 0.1;
 const LADDER_SPEED = 140;
 
+const MAX_HP = 100;
+const HAZARD_DAMAGE = 20;
+const HAZARD_IFRAMES = 1.0; // seconds of invulnerability after taking a hit
+
 const PLAYER_W = 22;
 const PLAYER_H = 28;
 
@@ -24,11 +28,15 @@ export class Player {
   readonly sprite: PIXI.Sprite;
   readonly body: Body;
 
+  readonly maxHp = MAX_HP;
+  hp = MAX_HP;
+
   private grounded = false;
   private onLadder = false;
   private climbing = false;
   private coyoteTimer = 0;
   private jumpBufferTimer = 0;
+  private damageCooldown = 0;
   private facing: 1 | -1 = 1;
   private spawn: { x: number; y: number };
 
@@ -101,12 +109,29 @@ export class Player {
       this.body.vy *= JUMP_CUT_MULTIPLIER;
     }
 
+    // Hazard damage with brief invulnerability so a single tile does not
+    // drain the bar every frame.
+    this.damageCooldown = Math.max(0, this.damageCooldown - dt);
+    if (collisions.inHazard && this.damageCooldown <= 0 && this.hp > 0) {
+      this.hp = Math.max(0, this.hp - HAZARD_DAMAGE);
+      this.damageCooldown = HAZARD_IFRAMES;
+      // Small knock-up so the player doesn't get stuck inside spikes.
+      this.body.vy = -JUMP_VELOCITY * 0.45;
+      if (this.hp <= 0) this.respawn();
+    }
+
     // Out-of-world respawn.
     if (this.body.y > level.pixelHeight + 200) {
       this.respawn();
     }
 
     this.syncSprite();
+    // Flash sprite while invulnerable.
+    if (this.damageCooldown > 0) {
+      this.sprite.alpha = Math.floor(this.damageCooldown * 12) % 2 === 0 ? 0.35 : 1;
+    } else {
+      this.sprite.alpha = 1;
+    }
   }
 
   private updateGroundAir(dt: number, dir: number, input: InputState): void {
@@ -157,6 +182,8 @@ export class Player {
     this.body.vy = 0;
     this.body.prevBottom = this.body.y + PLAYER_H;
     this.climbing = false;
+    this.hp = MAX_HP;
+    this.damageCooldown = HAZARD_IFRAMES; // brief invuln on respawn
   }
 
   private syncSprite(): void {

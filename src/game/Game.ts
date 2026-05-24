@@ -25,6 +25,9 @@ export class Game {
   private readonly worldContainer = new PIXI.Container();
   private readonly hud = new PIXI.Container();
   private readonly hudText: PIXI.Text;
+  private readonly hpBarBg = new PIXI.Graphics();
+  private readonly hpBarFg = new PIXI.Graphics();
+  private readonly hpLabel: PIXI.Text;
 
   private cameraX = 0;
   private cameraY = 0;
@@ -42,12 +45,32 @@ export class Game {
     this.app.stage.addChild(this.worldContainer);
     this.app.stage.addChild(this.hud);
 
+    // HP bar (top-left): dark background + red fill.
+    this.hpBarBg.beginFill(0x000000, 0.55);
+    this.hpBarBg.lineStyle(2, 0x000000, 0.8);
+    this.hpBarBg.drawRoundedRect(0, 0, 140, 16, 3);
+    this.hpBarBg.endFill();
+    this.hpBarBg.position.set(8, 8);
+    this.hud.addChild(this.hpBarBg);
+
+    this.hpBarFg.position.set(11, 11);
+    this.hud.addChild(this.hpBarFg);
+
+    this.hpLabel = new PIXI.Text('HP 100', {
+      fontFamily: 'system-ui, sans-serif',
+      fontSize: 11,
+      fontWeight: '600',
+      fill: 0xffffff,
+    });
+    this.hpLabel.position.set(14, 9);
+    this.hud.addChild(this.hpLabel);
+
     this.hudText = new PIXI.Text('loading...', {
       fontFamily: 'system-ui, sans-serif',
-      fontSize: 14,
-      fill: 0xeaeaea,
+      fontSize: 12,
+      fill: 0xbac0c8,
     });
-    this.hudText.position.set(8, 8);
+    this.hudText.position.set(8, 30);
     this.hud.addChild(this.hudText);
   }
 
@@ -85,6 +108,13 @@ export class Game {
     this.player.update(dt, input, this.level);
     this.updateCamera(dt);
     this.applyCamera(false);
+
+    const hpRatio = this.player.hp / this.player.maxHp;
+    this.hpBarFg.clear();
+    this.hpBarFg.beginFill(hpRatio > 0.33 ? 0xd84a3a : 0xff7060);
+    this.hpBarFg.drawRoundedRect(0, 0, 134 * hpRatio, 10, 2);
+    this.hpBarFg.endFill();
+    this.hpLabel.text = `HP ${this.player.hp}`;
 
     this.hudText.text =
       `pos ${this.player.body.x.toFixed(0)},${this.player.body.y.toFixed(0)} ` +
