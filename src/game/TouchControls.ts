@@ -26,12 +26,20 @@ export class TouchControls {
         }
         .touch-controls .pad {
           position: absolute;
-          display: flex;
-          gap: 12px;
           pointer-events: auto;
         }
-        .touch-controls .pad.left { flex-direction: column; }
-        .touch-controls .pad .row { display: flex; gap: 12px; }
+        .touch-controls .pad.right { display: flex; gap: 12px; }
+        /* D-pad cross: 3x3 grid with only the cardinal cells filled. */
+        .touch-controls .pad.left {
+          display: grid;
+          grid-template-columns: repeat(3, 64px);
+          grid-template-rows:    repeat(3, 64px);
+          gap: 4px;
+        }
+        .touch-controls .pad.left button[data-key="up"]    { grid-column: 2; grid-row: 1; border-radius: 12px 12px 4px 4px; }
+        .touch-controls .pad.left button[data-key="left"]  { grid-column: 1; grid-row: 2; border-radius: 12px 4px 4px 12px; }
+        .touch-controls .pad.left button[data-key="right"] { grid-column: 3; grid-row: 2; border-radius: 4px 12px 12px 4px; }
+        .touch-controls .pad.left button[data-key="down"]  { grid-column: 2; grid-row: 3; border-radius: 4px 4px 12px 12px; }
         /* Native landscape: safe-area axes line up with content axes. */
         .touch-controls .pad.left  {
           left:   max(24px, env(safe-area-inset-left));
@@ -59,6 +67,7 @@ export class TouchControls {
             bottom: max(24px, env(safe-area-inset-left));
           }
         }
+        .touch-controls .pad.left button { width: 64px; height: 64px; }
         .touch-controls button {
           width: 72px; height: 72px; border-radius: 50%;
           border: 2px solid rgba(255,255,255,0.4);
@@ -77,14 +86,10 @@ export class TouchControls {
         .touch-controls .pad.right button.jump.active { background: rgba(80,200,120,0.7); }
       </style>
       <div class="pad left">
-        <div class="row">
-          <button data-key="up" aria-label="Up">&#9650;</button>
-          <button data-key="down" aria-label="Down">&#9660;</button>
-        </div>
-        <div class="row">
-          <button data-key="left" aria-label="Left">&#9664;</button>
-          <button data-key="right" aria-label="Right">&#9654;</button>
-        </div>
+        <button data-key="up"    aria-label="Up">&#9650;</button>
+        <button data-key="left"  aria-label="Left">&#9664;</button>
+        <button data-key="right" aria-label="Right">&#9654;</button>
+        <button data-key="down"  aria-label="Down">&#9660;</button>
       </div>
       <div class="pad right">
         <button data-key="attack" aria-label="Attack">&#9876;</button>
