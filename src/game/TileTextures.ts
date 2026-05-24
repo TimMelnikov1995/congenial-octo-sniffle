@@ -32,8 +32,11 @@ export function generateTestTileset(
   for (let i = 0; i < tileCount; i++) {
     const g = new PIXI.Graphics();
     drawers[i](g);
-    g.x = i * tileSize;
-    renderer.render(g, { renderTexture: renderTex, clear: false });
+    renderer.render(g, {
+      renderTexture: renderTex,
+      clear: i === 0,
+      transform: new PIXI.Matrix().translate(i * tileSize, 0),
+    });
     g.destroy();
   }
 
@@ -135,7 +138,7 @@ export function generatePlayerTexture(
   g.beginFill(0x402020);
   g.drawRect(0, height * 0.55, width, 3);
   g.endFill();
-  renderer.render(g, { renderTexture: rt });
+  renderer.render(g, { renderTexture: rt, clear: true });
   g.destroy();
   return rt;
 }
