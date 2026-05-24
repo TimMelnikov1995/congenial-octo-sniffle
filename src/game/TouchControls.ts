@@ -32,8 +32,8 @@ export class TouchControls {
         /* D-pad cross: 3x3 grid with only the cardinal cells filled. */
         .touch-controls .pad.left {
           display: grid;
-          grid-template-columns: repeat(3, 64px);
-          grid-template-rows:    repeat(3, 64px);
+          grid-template-columns: repeat(3, 48px);
+          grid-template-rows:    repeat(3, 48px);
           gap: 4px;
         }
         .touch-controls .pad.left button[data-key="up"]    { grid-column: 2; grid-row: 1; border-radius: 12px 12px 4px 4px; }
@@ -67,7 +67,7 @@ export class TouchControls {
             bottom: max(24px, env(safe-area-inset-left));
           }
         }
-        .touch-controls .pad.left button { width: 64px; height: 64px; }
+        .touch-controls .pad.left button { width: 48px; height: 48px; font-size: 20px; }
         .touch-controls button {
           width: 72px; height: 72px; border-radius: 50%;
           border: 2px solid rgba(255,255,255,0.4);
