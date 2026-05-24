@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import type { InputState } from './Input';
 import type { Level } from './Level';
-import { type Body, moveAndCollide } from './Physics';
+import { type Body, moveAndCollide, probeGround } from './Physics';
 import { generatePlayerTexture } from './TileTextures';
 
 const RUN_SPEED = 220;
@@ -10,7 +10,8 @@ const AIR_ACCEL = 1200;
 const GROUND_FRICTION = 2200;
 const GRAVITY = 1800;
 const MAX_FALL = 900;
-const JUMP_VELOCITY = 560;
+// Jump height = v^2 / (2g). Bumped by sqrt(1.5) for ~1.5x apex height.
+const JUMP_VELOCITY = 686;
 const JUMP_CUT_MULTIPLIER = 0.35;
 const COYOTE_TIME = 0.1;
 const JUMP_BUFFER = 0.1;
@@ -66,7 +67,12 @@ export class Player {
 
     const collisions = moveAndCollide(this.body, dt, level, /*ignorePlatforms*/ true);
 
-    this.grounded = collisions.grounded;
+    // A body resting on the floor sits exactly one pixel above it, so the
+    // standard overlap test does not register as "grounded". A foot probe
+    // catches this and keeps gravity from re-accelerating us every frame.
+    const probed = probeGround(this.body, level);
+    this.grounded = collisions.grounded || probed;
+    if (this.grounded && this.body.vy > 0) this.body.vy = 0;
     this.onLadder = collisions.onLadder;
 
     if (this.grounded) {
@@ -113,7 +119,11 @@ export class Player {
     if (this.onLadder && input.jumpPressed) {
       this.climbing = false;
     }
-    this.body.vy = Math.min(MAX_FALL, this.body.vy + GRAVITY * dt);
+    if (this.grounded && this.body.vy >= 0) {
+      this.body.vy = 0;
+    } else {
+      this.body.vy = Math.min(MAX_FALL, this.body.vy + GRAVITY * dt);
+    }
   }
 
   private updateClimb(dt: number, input: InputState): void {

@@ -33,6 +33,24 @@ export function emptyCollision(): CollisionResult {
   };
 }
 
+export function probeGround(body: Body, level: Level): boolean {
+  // AABB rest position has body.y + body.height == tileTop, so the standard
+  // overlap check (which subtracts 1 to avoid edge-touch false positives) does
+  // not see the floor. Probe one pixel below to detect "still standing".
+  const tw = level.tileWidth;
+  const th = level.tileHeight;
+  const probeY = body.y + body.height;
+  const ty = Math.floor(probeY / th);
+  const left = Math.floor(body.x / tw);
+  const right = Math.floor((body.x + body.width - 1) / tw);
+  for (let tx = left; tx <= right; tx++) {
+    const f = level.getTileFlagsAt(tx, ty);
+    if (f.solid) return true;
+    if (f.platform && body.vy >= 0) return true;
+  }
+  return false;
+}
+
 // Caller is responsible for setting body.prevBottom = body.y + body.height before
 // applying any movement for the frame, so one-way platform tests can compare.
 export function moveAndCollide(
