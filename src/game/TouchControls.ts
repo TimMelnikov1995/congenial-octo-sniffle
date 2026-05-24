@@ -15,9 +15,8 @@ export class TouchControls {
     root.innerHTML = `
       <style>
         /* position: absolute (not fixed) so the controls stay inside #app
-           and follow its CSS transform when we force-landscape on portrait
-           phones. env(safe-area-inset-*) is viewport-relative and does not
-           line up after rotation, so use plain padding. */
+           and follow its CSS transform when we force-landscape on a portrait
+           phone. */
         .touch-controls {
           position: absolute;
           inset: 0;
@@ -31,8 +30,33 @@ export class TouchControls {
           gap: 12px;
           pointer-events: auto;
         }
-        .touch-controls .pad.left  { left:  18px; bottom: 18px; }
-        .touch-controls .pad.right { right: 18px; bottom: 18px; }
+        /* Native landscape: safe-area axes line up with content axes. */
+        .touch-controls .pad.left  {
+          left:   max(24px, env(safe-area-inset-left));
+          bottom: max(24px, env(safe-area-inset-bottom));
+        }
+        .touch-controls .pad.right {
+          right:  max(24px, env(safe-area-inset-right));
+          bottom: max(24px, env(safe-area-inset-bottom));
+        }
+        /* Portrait phone with CSS rotate(90deg) applied to #app: the
+           content's logical axes are rotated relative to the device, so the
+           safe-area variables must be remapped. After CW rotation:
+             logical left  <- physical top    (notch / status bar)
+             logical right <- physical bottom (home indicator)
+             logical bottom<- physical left   (rounded corner)
+             logical top   <- physical right  (rounded corner)
+        */
+        @media (orientation: portrait) and (hover: none) {
+          .touch-controls .pad.left {
+            left:   max(24px, env(safe-area-inset-top));
+            bottom: max(24px, env(safe-area-inset-left));
+          }
+          .touch-controls .pad.right {
+            right:  max(24px, env(safe-area-inset-bottom));
+            bottom: max(24px, env(safe-area-inset-left));
+          }
+        }
         .touch-controls button {
           width: 72px; height: 72px; border-radius: 50%;
           border: 2px solid rgba(255,255,255,0.4);
