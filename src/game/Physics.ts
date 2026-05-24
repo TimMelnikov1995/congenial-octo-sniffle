@@ -69,8 +69,11 @@ export function moveAndCollide(
     1,
     Math.ceil(Math.max(Math.abs(dxTotal), Math.abs(dyTotal)) / maxStep),
   );
-  const dx = dxTotal / stepCount;
-  const dy = dyTotal / stepCount;
+  // Mutable: once a collision zeros vx/vy, subsequent substeps must stop
+  // pushing the body in that direction or it will embed into the tile (the
+  // axis resolver only un-embeds when vx/vy still has the matching sign).
+  let dx = dxTotal / stepCount;
+  let dy = dyTotal / stepCount;
 
   for (let s = 0; s < stepCount; s++) {
     // X axis
@@ -78,10 +81,12 @@ export function moveAndCollide(
     const xHits = resolveAxis(body, level, 'x');
     if (xHits.hitNeg) {
       body.vx = 0;
+      dx = 0;
       result.wallLeft = true;
     }
     if (xHits.hitPos) {
       body.vx = 0;
+      dx = 0;
       result.wallRight = true;
     }
 
@@ -91,10 +96,12 @@ export function moveAndCollide(
     const yHits = resolveAxis(body, level, 'y', ignorePlatforms, prevBottom);
     if (yHits.hitNeg) {
       body.vy = 0;
+      dy = 0;
       result.ceiling = true;
     }
     if (yHits.hitPos) {
       body.vy = 0;
+      dy = 0;
       result.grounded = true;
     }
   }
