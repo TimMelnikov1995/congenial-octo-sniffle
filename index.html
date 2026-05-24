@@ -32,12 +32,30 @@
         width: 100%;
         height: 100%;
       }
+      /* Force-landscape on portrait touch devices: rotate the whole app
+         container by -90deg and swap its logical width/height so Pixi (and
+         the touch-controls overlay inside #app) still see a normal landscape
+         viewport. The user just turns the phone — when the device flips to
+         landscape this media query stops matching and the page returns to
+         its untransformed layout. */
+      @media (orientation: portrait) and (hover: none) {
+        #app {
+          inset: auto;
+          top: 50%;
+          left: 50%;
+          width: 100vh;
+          height: 100vw;
+          transform: translate(-50%, -50%) rotate(-90deg);
+          transform-origin: center center;
+        }
+      }
     </style>
   </head>
   <body>
-    <div id="app"></div>
-    <div id="boot-status" style="position:fixed;left:8px;top:8px;z-index:9998;color:#9aa;font:12px/1.3 monospace;pointer-events:none;background:rgba(0,0,0,0.4);padding:4px 6px;border-radius:4px;">
-      boot: html parsed, waiting for js&hellip;
+    <div id="app">
+      <div id="boot-status" style="position:absolute;left:8px;top:8px;z-index:9998;color:#9aa;font:12px/1.3 monospace;pointer-events:none;background:rgba(0,0,0,0.4);padding:4px 6px;border-radius:4px;">
+        boot: html parsed, waiting for js&hellip;
+      </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

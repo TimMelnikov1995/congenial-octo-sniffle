@@ -14,8 +14,12 @@ export class TouchControls {
     root.className = 'touch-controls';
     root.innerHTML = `
       <style>
+        /* position: absolute (not fixed) so the controls stay inside #app
+           and follow its CSS transform when we force-landscape on portrait
+           phones. env(safe-area-inset-*) is viewport-relative and does not
+           line up after rotation, so use plain padding. */
         .touch-controls {
-          position: fixed;
+          position: absolute;
           inset: 0;
           pointer-events: none;
           z-index: 10;
@@ -27,8 +31,8 @@ export class TouchControls {
           gap: 12px;
           pointer-events: auto;
         }
-        .touch-controls .pad.left  { left:  max(env(safe-area-inset-left), 18px); bottom: max(env(safe-area-inset-bottom), 18px); }
-        .touch-controls .pad.right { right: max(env(safe-area-inset-right), 18px); bottom: max(env(safe-area-inset-bottom), 18px); }
+        .touch-controls .pad.left  { left:  18px; bottom: 18px; }
+        .touch-controls .pad.right { right: 18px; bottom: 18px; }
         .touch-controls button {
           width: 72px; height: 72px; border-radius: 50%;
           border: 2px solid rgba(255,255,255,0.4);
