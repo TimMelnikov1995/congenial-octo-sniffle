@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import type { InputState } from './Input';
 import type { Level } from './Level';
-import { type Body, moveAndCollide, probeGround } from './Physics';
+import { type Body, moveAndCollide, probeGround, findLadderCenterX } from './Physics';
 import { generatePlayerTexture } from './TileTextures';
 
 const RUN_SPEED = 220;
@@ -54,13 +54,15 @@ export class Player {
     if (dir !== 0) this.facing = dir as 1 | -1;
 
     // Climb intent: pressing up or down while overlapping a ladder grabs it.
+    // Pressing up while grounded under a ladder also grabs it (so the player
+    // can mount from the ground without first being mid-tile).
     if (this.onLadder && (input.up || input.down)) {
       this.climbing = true;
     }
     if (!this.onLadder) this.climbing = false;
 
     if (this.climbing) {
-      this.updateClimb(dt, input);
+      this.updateClimb(input, level);
     } else {
       this.updateGroundAir(dt, dir, input);
     }
@@ -126,17 +128,26 @@ export class Player {
     }
   }
 
-  private updateClimb(dt: number, input: InputState): void {
+  private updateClimb(input: InputState, level: Level): void {
     const vDir = (input.down ? 1 : 0) - (input.up ? 1 : 0);
     this.body.vy = vDir * LADDER_SPEED;
-    const hDir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
-    this.body.vx = hDir * RUN_SPEED * 0.6;
+
+    // Snap horizontally to the ladder column center so the player rides up
+    // the middle instead of clipping the edge of a solid neighbour tile.
+    const ladderX = findLadderCenterX(this.body, level);
+    if (ladderX !== null) {
+      this.body.x = ladderX - this.body.width / 2;
+    }
+    this.body.vx = 0;
+
+    // Jump detaches and gives a small hop; left/right at the moment of jump
+    // chooses an escape direction.
     if (input.jumpPressed) {
       this.climbing = false;
       this.body.vy = -JUMP_VELOCITY * 0.8;
+      const hDir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+      this.body.vx = hDir * RUN_SPEED;
     }
-    // Touch dt so linter does not complain about unused parameter; physics dt is applied in moveAndCollide.
-    void dt;
   }
 
   private respawn(): void {

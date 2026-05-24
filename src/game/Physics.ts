@@ -33,6 +33,31 @@ export function emptyCollision(): CollisionResult {
   };
 }
 
+// Returns the world-X center of the ladder tile under the body's horizontal
+// center, or null if the body is not overlapping a ladder column.
+export function findLadderCenterX(body: Body, level: Level): number | null {
+  const tw = level.tileWidth;
+  const th = level.tileHeight;
+  const centerX = body.x + body.width / 2;
+  const centerTileX = Math.floor(centerX / tw);
+  const top = Math.floor(body.y / th);
+  const bottom = Math.floor((body.y + body.height - 1) / th);
+  for (let ty = top; ty <= bottom; ty++) {
+    const f = level.getTileFlagsAt(centerTileX, ty);
+    if (f.ladder) return centerTileX * tw + tw / 2;
+  }
+  // Also accept ladder in adjacent columns if body overlaps it.
+  const left = Math.floor(body.x / tw);
+  const right = Math.floor((body.x + body.width - 1) / tw);
+  for (let tx = left; tx <= right; tx++) {
+    for (let ty = top; ty <= bottom; ty++) {
+      const f = level.getTileFlagsAt(tx, ty);
+      if (f.ladder) return tx * tw + tw / 2;
+    }
+  }
+  return null;
+}
+
 export function probeGround(body: Body, level: Level): boolean {
   // AABB rest position has body.y + body.height == tileTop, so the standard
   // overlap check (which subtracts 1 to avoid edge-touch false positives) does
