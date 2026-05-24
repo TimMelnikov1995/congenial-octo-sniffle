@@ -30,6 +30,8 @@ export class TouchControls {
           gap: 12px;
           pointer-events: auto;
         }
+        .touch-controls .pad.left { flex-direction: column; }
+        .touch-controls .pad .row { display: flex; gap: 12px; }
         /* Native landscape: safe-area axes line up with content axes. */
         .touch-controls .pad.left  {
           left:   max(24px, env(safe-area-inset-left));
@@ -75,8 +77,14 @@ export class TouchControls {
         .touch-controls .pad.right button.jump.active { background: rgba(80,200,120,0.7); }
       </style>
       <div class="pad left">
-        <button data-key="left" aria-label="Left">&#9664;</button>
-        <button data-key="right" aria-label="Right">&#9654;</button>
+        <div class="row">
+          <button data-key="up" aria-label="Up">&#9650;</button>
+          <button data-key="down" aria-label="Down">&#9660;</button>
+        </div>
+        <div class="row">
+          <button data-key="left" aria-label="Left">&#9664;</button>
+          <button data-key="right" aria-label="Right">&#9654;</button>
+        </div>
       </div>
       <div class="pad right">
         <button data-key="attack" aria-label="Attack">&#9876;</button>
