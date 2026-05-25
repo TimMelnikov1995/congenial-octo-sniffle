@@ -75,7 +75,6 @@ export class TouchControls {
           color: #fff; font-size: 28px; font-weight: 600;
           touch-action: none; user-select: none;
           display: flex; align-items: center; justify-content: center;
-          backdrop-filter: blur(6px);
           -webkit-tap-highlight-color: transparent;
         }
         .touch-controls button.active {

@@ -28,6 +28,7 @@ export class Game {
   private readonly hpBarBg = new PIXI.Graphics();
   private readonly hpBarFg = new PIXI.Graphics();
   private readonly hpLabel: PIXI.Text;
+  private lastDrawnHp = -1;
 
   private cameraX = 0;
   private cameraY = 0;
@@ -37,7 +38,7 @@ export class Game {
       resizeTo: parent,
       backgroundColor: 0x10141c,
       antialias: false,
-      resolution: window.devicePixelRatio || 1,
+      resolution: Math.min(window.devicePixelRatio || 1, 2),
       autoDensity: true,
     });
     parent.appendChild(this.app.view as HTMLCanvasElement);
@@ -109,12 +110,15 @@ export class Game {
     this.updateCamera(dt);
     this.applyCamera(false);
 
-    const hpRatio = this.player.hp / this.player.maxHp;
-    this.hpBarFg.clear();
-    this.hpBarFg.beginFill(hpRatio > 0.33 ? 0xd84a3a : 0xff7060);
-    this.hpBarFg.drawRoundedRect(0, 0, 134 * hpRatio, 10, 2);
-    this.hpBarFg.endFill();
-    this.hpLabel.text = `HP ${this.player.hp}`;
+    if (this.player.hp !== this.lastDrawnHp) {
+      const hpRatio = this.player.hp / this.player.maxHp;
+      this.hpBarFg.clear();
+      this.hpBarFg.beginFill(hpRatio > 0.33 ? 0xd84a3a : 0xff7060);
+      this.hpBarFg.drawRoundedRect(0, 0, 134 * hpRatio, 10, 2);
+      this.hpBarFg.endFill();
+      this.hpLabel.text = `HP ${this.player.hp}`;
+      this.lastDrawnHp = this.player.hp;
+    }
 
     this.hudText.text =
       `pos ${this.player.body.x.toFixed(0)},${this.player.body.y.toFixed(0)} ` +
